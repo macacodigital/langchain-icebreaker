@@ -1,25 +1,8 @@
 from langchain.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
+from langchain.chains import LLMChain
 
-information = """
-Claudio Fayad 
-Vice President of Technology, Process Systems & Solutions, 
-Emerson Automation Solutions 
-Claudio Fayad is currently vice president of technology of Emersons process 
-systems and solutions business. In this role since August 2016, Claudio is responsible 
-for product strategy and development of mission-critical platforms. He actively works 
-with customers and stakeholders across the organization to develop innovative digital 
-initiatives and extend DeltaV into a broader digital ecosystem.  
-Claudio has 27 years in the Automations Solutions business include previous roles 
-in engineering, sales, project execution, project management, business management, 
-product marketing and technology, participating in many projects around the world. 
-Claudio has a passion for bringing people together to drive results through 
-change, engagement and diversity.  
-Originally from Brazil, Claudio attained his electrical engineering degree from 
-UNICAMP (Campinas University) University with a major in process control. He earned 
-his executive MBA degree from Fundação Dom Cabral and is also a graduate of the 
-post-MBA executive program from Kellogg. 
-"""
+from third_parties.linkedin import scrape_linkedin_profile
 
 if __name__ == '__main__':
     print('Hello Langchain!')
@@ -30,12 +13,20 @@ if __name__ == '__main__':
         2. two interesting facts about them
     """
 
-    summary_prompt_template = PromptTemplate(input_variables=["information"], template=summary_template)
+    summary_prompt_template = PromptTemplate(
+        input_variables=["information"],
+        template=summary_template
+    )
 
     llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo")
 
-    chain = summary_prompt_template | llm
+    chain = LLMChain(llm=llm, prompt=summary_prompt_template)
 
-    res = chain.invoke(input={"information": information})
+    linkedin_data = scrape_linkedin_profile(
+        linkedin_profile_url="https://www.linkedin.com/in/eden-marco/",
+        mock=True
+    )
+
+    res = chain.invoke(input={"information": linkedin_data})
 
     print(res)
